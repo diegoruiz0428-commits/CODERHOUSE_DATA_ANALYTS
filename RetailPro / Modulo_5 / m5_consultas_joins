@@ -1,0 +1,47 @@
+
+
+
+--Consulta 1 — Vista base del proyecto (INNER JOIN)
+
+SELECT c.nombre, v.cantidad, p.nombre_producto,
+       cat.nombre_categoria, v.fecha_venta, v.precio_unitario,
+        c.id_cliente, c.ciudad,v.cantidad * v.precio_unitario AS total_venta
+FROM ventas v
+INNER JOIN clientes c
+    ON c.id_cliente = v.id_cliente
+INNER JOIN productos p
+    ON p.id_producto = v.id_producto
+INNER JOIN categorias cat
+    ON p.id_categoria = cat.id_categoria;
+
+--Consulta 2 — Clientes sin ventas (LEFT JOIN) 
+
+SELECT c.nombre,c.email,c.fecha_registro
+FROM clientes c
+LEFT JOIN ventas v
+    ON v.id_cliente= c.id_cliente
+WHERE v.id_venta IS NULL; 
+
+--Consulta 3 — Productos sin ventas (LEFT JOIN)
+
+SELECT p.nombre_producto,cat.nombre_categoria,p.precio
+FROM productos p
+LEFT JOIN ventas v
+    ON v.id_producto= p.id_producto
+LEFT JOIN categorias cat
+    ON p.id_categoria= cat.id_categoria     
+WHERE v.id_venta IS NULL; 
+
+
+--Consulta 4 — Consolidado por canal (UNION ALL)
+
+SELECT canal, SUM(total) AS total_canal
+FROM (
+    SELECT fecha_venta, cantidad * precio_unitario AS total, 'Periodo_inicial' AS canal
+    FROM ventas WHERE fecha_venta BETWEEN  '2024-03-05' AND '2024-03-10'
+	UNION ALL
+    SELECT fecha_venta, cantidad * precio_unitario AS total, 'Periodo_final' AS canal
+    FROM ventas WHERE fecha_venta BETWEEN  '2024-03-11' AND '2024-03-15'
+) AS consolidado
+GROUP BY canal;
+
